@@ -3,3 +3,5 @@ numpy
 matplotlib
 seaborn
 kaggle
+dotenv
+scikit-learn
