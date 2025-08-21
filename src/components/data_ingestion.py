@@ -2,11 +2,11 @@ from utils.logger import logging
 from utils.exception import CustomException
 
 import pandas as pd
-import numpy as np
 import kaggle
 import sys
 import os
-from src.configs import DataIngestionConfig
+from src.entity.config_entity import DataIngestionConfig
+from src.entity.artifact_entity import DataIngestionArtifact
 from sklearn.model_selection import train_test_split
 from dotenv import load_dotenv
  
@@ -21,11 +21,12 @@ class DataIngestion:
     This class provides method to ingest the data from DataSourse (Kaggle)
     """
 
-    def __init__(self ,dataingestionconfig = DataIngestionConfig()):
+    def __init__(self ,dataingestionconfig :DataIngestionConfig = DataIngestionConfig()):
         
         self.data_path = dataingestionconfig.DATASET_PATH
         self.train_data_path = dataingestionconfig.TRAIN_PATH
         self.test_data_path = dataingestionconfig.TEST_PATH
+
         self.status = None
 
     def get_data_from_kaggle(self ,user_name :str = USER_NAME , dataset_name :str = DATASET_NAME ) ->str:
@@ -68,11 +69,11 @@ class DataIngestion:
             test_df.to_csv(test_path,index=False)
 
             logging.info(f"Train and Test data saved to {train_path} , {test_path} respectively.")
-
+            return train_path , test_path
         except Exception as e:
             raise CustomException(e,sys)
         
-    def initiate_data_ingestion(self):
+    def initiate_data_ingestion(self)-> DataIngestionArtifact:
         """
         This method will initaite the process.
         """
@@ -81,11 +82,10 @@ class DataIngestion:
             data_path = self.get_data_from_kaggle()
             
             logging.info("Dataset obtained.")
-            self.split_test_train(filepath=data_path)
+            train_path , test_path = self.split_test_train(filepath=data_path)
+            dataingestionartifact = dataingestionartifact(train_path,test_path)
             logging.info("DATA INGESTION COMPLETED.")
-            self.status = True
-
-            return self.status
+            return dataingestionartifact
 
         except Exception as e:
             raise CustomException(e,sys)

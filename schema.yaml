@@ -1,0 +1,81 @@
+columns:
+  - Hours_Studied: int
+  - Attendance: int
+  - Parental_Involvement: category
+  - Access_to_Resources: category
+  - Extracurricular_Activities: category
+  - Sleep_Hours: int
+  - Previous_Scores: int
+  - Motivation_Level: category
+  - Internet_Access: category
+  - Tutoring_Sessions: int
+  - Family_Income: category
+  - Teacher_Quality: category
+  - School_Type: category
+  - Peer_Influence: category
+  - Physical_Activity: int
+  - Learning_Disabilities: category
+  - Parental_Education_Level: category
+  - Distance_from_Home: category
+  - Gender: category
+  - Exam_Score: int
+
+numerical_columns:
+  - Hours_Studied
+  - Attendance
+  - Sleep_Hours
+  - Previous_Scores
+  - Tutoring_Sessions
+  - Physical_Activity
+  - Exam_Score
+
+categorical_columns:
+  - Parental_Involvement
+  - Access_to_Resources
+  - Extracurricular_Activities
+  - Motivation_Level
+  - Internet_Access
+  - Family_Income
+  - Teacher_Quality
+  - School_Type
+  - Peer_Influence
+  - Learning_Disabilities
+  - Parental_Education_Level
+  - Distance_from_Home
+  - Gender
+
+drop_columns:
+  - Gender
+  - Sleep_Hours
+  - Physical_Activity
+  - School_Type
+
+# for data transformation
+si_oe_columns: # Imputer + OrdinalEncoder
+  - Teacher_Quality
+  - Parental_Education_Level
+  - Distance_from_Home
+
+oh_columns: # OneHotEncoder
+  - Learning_Disabilities
+  - Internet_Access
+
+oe_columns: # OrdinalEncoder
+  - Parental_Involvement
+  - Access_to_Resources
+  - Extracurricular_Activities
+  - Motivation_Level
+  - Family_Income
+  - School_Type
+  - Peer_Influence
+  - Gender
+
+ss_columns: # StandardScaler
+  - Attendance
+  - Previous_Scores
+
+transform_columns:
+  - Hours_Studied
+  - Sleep_Hours
+  - Tutoring_Sessions
+  - Physical_Activity

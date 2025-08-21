@@ -1,0 +1,11 @@
+from dataclasses import dataclass
+
+@dataclass
+class DataIngestionArtifact:
+    train_path : str
+    test_path : str
+
+@dataclass
+class DataValidationArtifact:
+    status : bool
+    data_drift_report : str
