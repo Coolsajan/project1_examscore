@@ -4,9 +4,10 @@ from src.entity.config_entity import DataValidationConfig
 from src.entity.artifact_entity import DataIngestionArtifact ,DataValidationArtifact
 from utils.common_utils import read_yaml_file , write_yaml_file
 import json
+
+import evidently
 from evidently import Report
-from evidently.metrics import *
-from evidently.presets import *
+from evidently.presets.drift import DataDriftPreset
 
 import pandas as pd
 import os, sys
@@ -17,7 +18,8 @@ class DataValidation():
     This class will validate the data using EvidentlyAI
     """
 
-    def __init__(self , data_validation_config :DataValidationConfig = DataValidationConfig() ):
+    def __init__(self , data_validation_config :DataValidationConfig,data_ingestion_artifact:DataIngestionArtifact):
+        self.data_ingestion_artifact = data_ingestion_artifact
         self.data_val_report_path = data_validation_config.DATA_VALIDATION_REPORT
         self._config_schema = read_yaml_file("schema.yaml")
         self.train_data = None
@@ -75,21 +77,31 @@ class DataValidation():
         This method wil examine and detect the data drift and provide the report.
         """
         try:
-            data_drift_profile = Report([DataDriftPreset() , DataSummaryPreset()])
+            data_drift_profile = Report(metrics=[DataDriftPreset()])
             logging.info("Report Object created.")
+            
+            print(DataDriftPreset)
+            print(hasattr(data_drift_profile, "json"))
+            print(hasattr(data_drift_profile, "save_json"))
+
 
             data_drift_profile.run(reference_data=refrence_df , current_data=current_df)
-
+            html_path = os.path.join(self.data_val_report_path , "data_drift_report.html")
+            data_drift_profile.save_html(html_path)
             report = data_drift_profile.json()
             json_report = json.loads(report)
 
             write_yaml_file(file_path=self.data_val_report_path , content=json_report) 
+            metrics = json_report['metrics']
 
-            n_features = json_report["data_drift"]["data"]["metrics"]["n_features"]
-            n_drifted_features = json_report["data_drift"]["data"]["metrics"]["n_drifted_features"]
+            n_features = len(metrics)
+            features_p_val = [val for val in metrics.startswith("ValueDrift")]
+
+            threshold = 0.05
+            n_drifted_features = sum( 1 for m in features_p_val if m['value'] > threshold)
 
             logging.info(f"{n_drifted_features}/{n_features} drift detected.")
-            drift_status = json_report["data_drift"]["data"]["metrics"]["dataset_drift"]
+            drift_status = n_drifted_features > 0
             return drift_status 
                   
         except Exception as e:
@@ -101,8 +113,8 @@ class DataValidation():
         """
         try:
             logging.info("Data Validiation initiated.")
-            train_data,test_data = (DataValidation.read_data(file_path=DataIngestionArtifact().train_path) 
-                                    ,DataValidation.read_data(file_path=DataIngestionArtifact().test_path))
+            train_data,test_data = (DataValidation.read_data(file_path=self.data_ingestion_artifact.train_path) 
+                                    ,DataValidation.read_data(file_path=self.data_ingestion_artifact.test_path))
             
             validation_error_msg =""
 
@@ -140,7 +152,7 @@ class DataValidation():
             logging.info(f"Data validation artifact: {data_validation_artifact}")
             return data_validation_artifact
         except Exception as e:
-            CustomException(e,sys)
+            raise CustomException(e,sys)
     
         
     
