@@ -15,3 +15,8 @@ class DataTransformationArtifact:
     transform_obj_path :str
     transformed_train :str
     transformed_test : str
+
+@dataclass
+class ModelTrainigArtifact:
+    trained_model_path : str
+    trained_model_score : str

@@ -31,3 +31,10 @@ class DataTransfromationConfig:
     DATA_TRANSFOMATION_OBJ = os.path.join(DATA_TRANSFOMATION_PATH,"transfomation.pkl")
     TRANSFORMED_TRAIN_DATA_PATH = os.path.join(DATA_TRANSFOMATION_PATH,"TRANSFORMED","transformed_train.csv")
     TRANSFORMED_TEST_DATA_PATH = os.path.join(DATA_TRANSFOMATION_PATH,"TRANSFORMED","transformed_test.csv")
+
+@dataclass
+class ModelTrainingConfig:
+    MODEL_TRAINING_PATH = os.path.join(trainingpieplineartifact,"MODEL_TRAINING")
+    TRAINED_MODEL_PATH = os.path.join(MODEL_TRAINING_PATH,"MODEL","model.pkl")
+    TRAINED_MODEL_SCORE = os.path.join(MODEL_TRAINING_PATH,"MODEL","scores.txt")
+

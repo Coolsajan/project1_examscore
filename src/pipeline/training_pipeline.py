@@ -4,9 +4,10 @@ from utils.logger import logging
 from src.components.data_ingestion import DataIngestion
 from src.components.data_validation import DataValidation
 from src.components.data_transformation import DataTransformation
+from src.components.model_training import ModelTraining
 
-from src.entity.config_entity import DataIngestionConfig,DataValidationConfig,DataTransfromationConfig
-from src.entity.artifact_entity import DataIngestionArtifact,DataValidationArtifact,DataTransformationArtifact
+from src.entity.config_entity import DataIngestionConfig,DataValidationConfig,DataTransfromationConfig,ModelTrainingConfig
+from src.entity.artifact_entity import DataIngestionArtifact,DataValidationArtifact,DataTransformationArtifact,ModelTrainigArtifact
 
 import os, sys
 
@@ -15,6 +16,7 @@ class ModelTrainingPipeline:
         self.data_ingestion_config = DataIngestionConfig()
         self.data_validation_config = DataValidationConfig()
         self.data_transformation_config = DataTransfromationConfig()
+        self.model_trainer_config = ModelTrainingConfig()
 
     def start_data_ingestion(self) -> DataIngestionArtifact:
         """
@@ -62,6 +64,21 @@ class ModelTrainingPipeline:
         except Exception as e:
             raise CustomException(e,sys)
         
+    def start_model_trainner(self ,data_transformation_artifact : DataTransformationArtifact)-> ModelTrainigArtifact:
+        """
+        This method of TrainPipeLine class is responsible for stating model trainer component.
+        """
+        try:
+            modeltrainerobj = ModelTraining(modeltrainingconfig=self.model_trainer_config,
+                                              datatransformationartifact=data_transformation_artifact)
+            
+            modeltrainerartifact = modeltrainerobj.initiate_model_train()
+            logging.info("Model Trainner Completed. Sucessfully")
+            logging.info("Exited the start_model_trainner method of TrainPipeline class")
+            return modeltrainerartifact
+            
+        except Exception as e:
+            raise CustomException(e,sys)
 
 
     def run_pipeline(self, ) -> None:
@@ -73,6 +90,7 @@ class ModelTrainingPipeline:
             data_validation_artifact = self.start_data_validation(dataingestionartifact=data_ingestion_artifact)
             data_transformation_artifact = self.start_data_transformation(dataingestionartifact=data_ingestion_artifact,
                                                                           datavalidationartifact=data_validation_artifact)
-            return data_transformation_artifact
+            model_trainer_artifact = self.start_model_trainner(data_transformation_artifact=data_transformation_artifact)
+            return model_trainer_artifact
         except Exception as e:
             raise CustomException(e,sys)
