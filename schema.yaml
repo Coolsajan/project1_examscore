@@ -20,6 +20,9 @@ columns:
   - Gender: category
   - Exam_Score: int
 
+target_column:
+  - Exam_Score
+
 numerical_columns:
   - Hours_Studied
   - Attendance

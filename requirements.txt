@@ -6,3 +6,4 @@ kaggle
 dotenv
 scikit-learn
 evidently
+dill

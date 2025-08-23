@@ -24,3 +24,10 @@ class DataIngestionConfig:
 class DataValidationConfig:
     DATA_VALIDATION_PATH = os.path.join(trainingpieplineartifact,"DATA_VALIDATION")
     DATA_VALIDATION_REPORT = os.path.join(DATA_VALIDATION_PATH,"Report")
+
+@dataclass
+class DataTransfromationConfig:
+    DATA_TRANSFOMATION_PATH = os.path.join(trainingpieplineartifact,"DATA_TRANSFORMATION")
+    DATA_TRANSFOMATION_OBJ = os.path.join(DATA_TRANSFOMATION_PATH,"transfomation.pkl")
+    TRANSFORMED_TRAIN_DATA_PATH = os.path.join(DATA_TRANSFOMATION_PATH,"TRANSFORMED","transformed_train.csv")
+    TRANSFORMED_TEST_DATA_PATH = os.path.join(DATA_TRANSFOMATION_PATH,"TRANSFORMED","transformed_test.csv")

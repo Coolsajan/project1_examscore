@@ -5,7 +5,11 @@ from src.entity.artifact_entity import DataIngestionArtifact ,DataValidationArti
 from utils.common_utils import read_yaml_file , write_yaml_file
 import json
 
-import evidently
+from evidently import Report
+from evidently.metrics import *
+from evidently.presets import *
+
+
 from evidently import Report
 from evidently.presets.drift import DataDriftPreset
 
@@ -20,7 +24,7 @@ class DataValidation():
 
     def __init__(self , data_validation_config :DataValidationConfig,data_ingestion_artifact:DataIngestionArtifact):
         self.data_ingestion_artifact = data_ingestion_artifact
-        self.data_val_report_path = data_validation_config.DATA_VALIDATION_REPORT
+        self.data_validation_config = data_validation_config
         self._config_schema = read_yaml_file("schema.yaml")
         self.train_data = None
         self.test_data = None
@@ -77,21 +81,20 @@ class DataValidation():
         This method wil examine and detect the data drift and provide the report.
         """
         try:
-            data_drift_profile = Report(metrics=[DataDriftPreset()])
+            data_drift_profile = Report([DataDriftPreset()])
             logging.info("Report Object created.")
-            
-            print(DataDriftPreset)
-            print(hasattr(data_drift_profile, "json"))
-            print(hasattr(data_drift_profile, "save_json"))
-
 
             data_drift_profile.run(reference_data=refrence_df , current_data=current_df)
-            html_path = os.path.join(self.data_val_report_path , "data_drift_report.html")
+            data_drift_profile
+            html_path = os.path.join(self.data_validation_config.DATA_VALIDATION_PATH , "data_drift_report.html")
             data_drift_profile.save_html(html_path)
+
             report = data_drift_profile.json()
+
             json_report = json.loads(report)
 
-            write_yaml_file(file_path=self.data_val_report_path , content=json_report) 
+            report_yaml_path = os.path.join(self.data_validation_config.DATA_VALIDATION_PATH,"datadrift_report.yaml")
+            write_yaml_file(file_path= report_yaml_path, content=json_report) 
             metrics = json_report['metrics']
 
             n_features = len(metrics)
@@ -148,7 +151,7 @@ class DataValidation():
                 else :
                     validation_error_msg = "Data Drift Not Detected"
 
-            data_validation_artifact = DataValidationArtifact(status=validation_status , data_drift_report=DataValidationConfig().DATA_VALIDATION_REPORT)
+            data_validation_artifact = DataValidationArtifact(status=validation_status , data_drift_report=self.data_validation_config.DATA_VALIDATION_REPORT)
             logging.info(f"Data validation artifact: {data_validation_artifact}")
             return data_validation_artifact
         except Exception as e:

@@ -9,3 +9,9 @@ class DataIngestionArtifact:
 class DataValidationArtifact:
     status : bool
     data_drift_report : str
+
+@dataclass
+class DataTransformationArtifact:
+    transform_obj_path :str
+    transformed_train :str
+    transformed_test : str
