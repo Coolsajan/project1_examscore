@@ -35,6 +35,6 @@ class DataTransfromationConfig:
 @dataclass
 class ModelTrainingConfig:
     MODEL_TRAINING_PATH = os.path.join(trainingpieplineartifact,"MODEL_TRAINING")
-    TRAINED_MODEL_PATH = os.path.join(MODEL_TRAINING_PATH,"MODEL","model.pkl")
-    TRAINED_MODEL_SCORE = os.path.join(MODEL_TRAINING_PATH,"MODEL","scores.txt")
+    CANDIDATE_MODELS_PATH = os.path.join(MODEL_TRAINING_PATH,"MODEL","CANDIDATE_MODELS")
+    CANDIDATE_MODELS_SCORE_PATH = os.path.join(MODEL_TRAINING_PATH,"MODEL","MODELS_SCORE")
 

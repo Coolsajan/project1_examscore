@@ -2,16 +2,8 @@ from utils.exception import CustomException
 from utils.logger import logging
 from src.entity.config_entity import DataValidationConfig
 from src.entity.artifact_entity import DataIngestionArtifact ,DataValidationArtifact
-from utils.common_utils import read_yaml_file , write_yaml_file
-import json
-
-from evidently import Report
-from evidently.metrics import *
-from evidently.presets import *
-
-
-from evidently import Report
-from evidently.presets.drift import DataDriftPreset
+from utils.common_utils import read_yaml_file ,save_object
+from scipy.stats import ks_2samp, chi2_contingency
 
 import pandas as pd
 import os, sys
@@ -76,36 +68,34 @@ class DataValidation():
         except Exception as e:
             raise CustomException(e,sys)
         
-    def detect_data_drift(self,refrence_df:pd.DataFrame , current_df : pd.DataFrame) -> bool:
+    
+    def detect_drift(self,train_df, test_df, alpha=0.05):
         """
-        This method wil examine and detect the data drift and provide the report.
+        This method will the detec is data drift is present or not.
         """
         try:
-            data_drift_profile = Report([DataDriftPreset()])
-            logging.info("Report Object created.")
+            drift_report = {}
+            num_drifted_feat = 0
+            drift_detected = False
+            for col in train_df.columns:
+                if pd.api.types.is_numeric_dtype(train_df[col]):
+                    stat, p = ks_2samp(train_df[col], test_df[col])
+                else:
+                    contingency = pd.crosstab(train_df[col], test_df[col])
+                    stat, p, _, _ = chi2_contingency(contingency)
+                
+                drift_report[col] = {
+                    "p_value": p,
+                    "drift_detected": p < alpha
+                }
+                if p < alpha :
+                    num_drifted_feat += 1
 
-            data_drift_profile.run(reference_data=refrence_df , current_data=current_df)
-            data_drift_profile
-            html_path = os.path.join(self.data_validation_config.DATA_VALIDATION_PATH , "data_drift_report.html")
-            data_drift_profile.save_html(html_path)
+            if num_drifted_feat > len(train_df.columns)*0.25:
+                drift_detected = True
 
-            report = data_drift_profile.json()
+            return drift_report , drift_detected
 
-            json_report = json.loads(report)
-
-            report_yaml_path = os.path.join(self.data_validation_config.DATA_VALIDATION_PATH,"datadrift_report.yaml")
-            write_yaml_file(file_path= report_yaml_path, content=json_report) 
-            metrics = json_report['metrics']
-
-            n_features = len(metrics)
-            features_p_val = [val for val in metrics.startswith("ValueDrift")]
-
-            threshold = 0.05
-            n_drifted_features = sum( 1 for m in features_p_val if m['value'] > threshold)
-
-            logging.info(f"{n_drifted_features}/{n_features} drift detected.")
-            drift_status = n_drifted_features > 0
-            return drift_status 
                   
         except Exception as e:
             raise CustomException(e,sys)
@@ -143,7 +133,11 @@ class DataValidation():
             validation_status = len(validation_error_msg) == 0
 
             if validation_status:
-                drift_status = self.detect_data_drift(refrence_df=train_data , current_df=test_data)
+                drift_report ,drift_status = self.detect_drift(train_df=train_data , test_df=test_data)
+                os.makedirs(os.path.dirname(self.data_validation_config.DATA_VALIDATION_REPORT), exist_ok=True)
+                save_object(file_path=self.data_validation_config.DATA_VALIDATION_REPORT, obj=drift_report)
+
+                
                 if drift_status:
                     logging.info(f"Data Drift Detected.")
                     validation_error_msg = "Data Drift Detected."
@@ -156,8 +150,3 @@ class DataValidation():
             return data_validation_artifact
         except Exception as e:
             raise CustomException(e,sys)
-    
-        
-    
-        
-    

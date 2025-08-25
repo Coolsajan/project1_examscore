@@ -75,18 +75,18 @@ class DataTransformation:
 
             logging.info(f"train and test data loaded , train : {train_data.shape} test : {test_data.shape}")
 
-            preproocessor = self.get_transformation_obj()
+            preprocessor = self.get_transformation_obj()
 
-            input_train_feature = train_data.drop(columns=[self._schema['target_column']]+[self._schema['drop_columns']])
+            input_train_feature = train_data.drop(columns=self._schema['target_column'])
             target_train_feature = train_data[self._schema['target_column']]
             logging.info("Trained input and output feature seperated.")
 
-            input_test_feature = test_data.drop(columns=[self._schema['target_column']]+[self._schema['drop_columns']])
+            input_test_feature = test_data.drop(columns=self._schema['target_column'])
             target_test_feature = test_data[self._schema['target_column']]
             logging.info("Trained input and output feature seperated.")
 
-            transformed_input_train_feature = preproocessor.fit_transform(input_train_feature)
-            transformed_input_test_feature = preproocessor.transform(input_test_feature)
+            transformed_input_train_feature = preprocessor.fit_transform(input_train_feature)
+            transformed_input_test_feature = preprocessor.transform(input_test_feature)
 
             transformed_train_data = np.c_[
                 transformed_input_train_feature , np.array(target_train_feature)
@@ -97,7 +97,7 @@ class DataTransformation:
             ]
 
             #saving obj and data,
-            save_object(file_path=self.data_transformation_config.DATA_TRANSFOMATION_OBJ)
+            save_object(file_path=self.data_transformation_config.DATA_TRANSFOMATION_OBJ ,obj =preprocessor )
             save_numpy_array_data(file_path = self.data_transformation_config.TRANSFORMED_TRAIN_DATA_PATH , array = transformed_train_data)
             save_numpy_array_data(file_path = self.data_transformation_config.TRANSFORMED_TEST_DATA_PATH , array = transformed_test_data )
             

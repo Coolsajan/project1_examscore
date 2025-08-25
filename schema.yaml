@@ -47,12 +47,6 @@ categorical_columns:
   - Distance_from_Home
   - Gender
 
-drop_columns:
-  - Gender
-  - Sleep_Hours
-  - Physical_Activity
-  - School_Type
-
 # for data transformation
 si_oe_columns: # Imputer + OrdinalEncoder
   - Teacher_Quality
