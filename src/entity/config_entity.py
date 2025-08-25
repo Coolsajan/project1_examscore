@@ -38,3 +38,9 @@ class ModelTrainingConfig:
     CANDIDATE_MODELS_PATH = os.path.join(MODEL_TRAINING_PATH,"MODEL","CANDIDATE_MODELS")
     CANDIDATE_MODELS_SCORE_PATH = os.path.join(MODEL_TRAINING_PATH,"MODEL","MODELS_SCORE")
 
+@dataclass
+class ModelEvaluationConfig:
+    MODEL_EVALUATION_PATH = os.path.join(trainingpieplineartifact,"MODEL_EVALUATION")
+    BEST_MODEL_PATH = os.path.join(MODEL_EVALUATION_PATH,"MODEL")
+
+

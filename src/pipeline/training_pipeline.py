@@ -5,9 +5,10 @@ from src.components.data_ingestion import DataIngestion
 from src.components.data_validation import DataValidation
 from src.components.data_transformation import DataTransformation
 from src.components.model_training import ModelTraining
+from src.components.model_eval import ModelEvaluation
 
-from src.entity.config_entity import DataIngestionConfig,DataValidationConfig,DataTransfromationConfig,ModelTrainingConfig
-from src.entity.artifact_entity import DataIngestionArtifact,DataValidationArtifact,DataTransformationArtifact,ModelTrainigArtifact
+from src.entity.config_entity import DataIngestionConfig,DataValidationConfig,DataTransfromationConfig,ModelTrainingConfig,ModelEvaluationConfig
+from src.entity.artifact_entity import DataIngestionArtifact,DataValidationArtifact,DataTransformationArtifact,ModelTrainigArtifact,ModelEvaluationArtifact
 
 import os, sys
 
@@ -17,6 +18,7 @@ class ModelTrainingPipeline:
         self.data_validation_config = DataValidationConfig()
         self.data_transformation_config = DataTransfromationConfig()
         self.model_trainer_config = ModelTrainingConfig()
+        self.model_evalutation_config = ModelEvaluationConfig()
 
     def start_data_ingestion(self) -> DataIngestionArtifact:
         """
@@ -79,6 +81,23 @@ class ModelTrainingPipeline:
             
         except Exception as e:
             raise CustomException(e,sys)
+        
+    def start_model_evaluation(self,model_traininer_artifact : ModelTrainigArtifact , data_transformation_artifact:DataTransformationArtifact) -> ModelEvaluationArtifact:
+        """
+        This method of TrainPipeLine class is responsible for stating model evaluation component.
+        """
+        try:
+            logging.info("Model evalutaion started in taining pipeline")
+            modelevalobj = ModelEvaluation(modelevaluationconfig=self.model_evalutation_config,\
+                                           modeltrainingartifact=model_traininer_artifact,
+                                           datatransformationartifact=data_transformation_artifact)
+            modelevalartifact = modelevalobj.initiate_model_eval()
+            logging.info("Model TraEvaluation inner Completed. Sucessfully")
+            logging.info("Exited the start_model_evaluation method of TrainPipeline class")
+            return modelevalartifact
+
+        except Exception as e:
+            raise CustomException(e,sys)
 
 
     def run_pipeline(self, ) -> None:
@@ -91,6 +110,9 @@ class ModelTrainingPipeline:
             data_transformation_artifact = self.start_data_transformation(dataingestionartifact=data_ingestion_artifact,
                                                                           datavalidationartifact=data_validation_artifact)
             model_trainer_artifact = self.start_model_trainner(data_transformation_artifact=data_transformation_artifact)
-            return model_trainer_artifact
+            model_eval_artifact = self.start_model_evaluation(model_traininer_artifact=model_trainer_artifact,
+                                                              data_transformation_artifact=data_transformation_artifact)
+            print(f"Best performing model path is {model_eval_artifact}")
+            return model_eval_artifact
         except Exception as e:
             raise CustomException(e,sys)

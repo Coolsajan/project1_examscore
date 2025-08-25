@@ -20,3 +20,7 @@ class DataTransformationArtifact:
 class ModelTrainigArtifact:
     trained_model_path : str
     trained_model_score : str
+
+@dataclass
+class ModelEvaluationArtifact:
+    best_model_path : str

@@ -37,7 +37,7 @@ class ModelTraining:
         try:
             models = self.get_model()
             trained_models = {}
-            model_scores = {}
+            train_scores = {}
 
             for model_name, (model, params) in models.items():
                 logging.info(f"Training with GridSearchCV on {model_name}...")
@@ -46,11 +46,11 @@ class ModelTraining:
                 grid_search.fit(train_X, train_y)
 
                 trained_models[model_name] = grid_search.best_estimator_
-                model_scores[model_name] = grid_search.best_score_
+                train_scores[model_name] = grid_search.best_score_
 
                 logging.info(f"{model_name} | Best Params: {grid_search.best_params_} | CV R2: {grid_search.best_score_}")
 
-            return trained_models, model_scores
+            return trained_models, train_scores
         except Exception as e:
             raise CustomException(e, sys)
 

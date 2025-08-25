@@ -11,7 +11,7 @@ def read_yaml_file(file_path: str) -> dict:
             return yaml.safe_load(yaml_file)
 
     except Exception as e:
-        raise CustomException(e, sys) from e
+        raise CustomException(e, sys) 
     
 
 def write_yaml_file(file_path: str, content: object, replace: bool = False) -> None:
@@ -23,7 +23,7 @@ def write_yaml_file(file_path: str, content: object, replace: bool = False) -> N
         with open(file_path, "w") as file:
             yaml.dump(content, file)
     except Exception as e:
-        raise CustomException(e, sys) from e
+        raise CustomException(e, sys) 
     
 def save_numpy_array_data(file_path: str, array: np.array):
     try:
@@ -47,4 +47,14 @@ def load_numpy_array_data(file_path: str) -> np.array:
         with open(file_path, 'rb') as file_obj:
             return np.load(file_obj)
     except Exception as e:
-        raise CustomException(e, sys) from e
+        raise CustomException(e, sys) 
+    
+
+def load_object(file_path: str) -> object:
+    try:
+        with open(file_path, "rb") as file_obj:
+            obj = dill.load(file_obj)
+        return obj
+
+    except Exception as e:
+        raise CustomException(e, sys) 
